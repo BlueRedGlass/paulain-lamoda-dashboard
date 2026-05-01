@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paulain × Lamoda — Операционный центр</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#f5f4f1;--card:#fff;--border:#e5e4e0;--text:#1a1a1a;--muted:#8a8a8a;--subtle:#b5b5b5;
+--green:#16a34a;--gbg:#dcfce7;--gt:#166534;
+--ybg:#fef9c3;--yt:#854d0e;
+--obg:#fed7aa;--ot:#9a3412;
+--red:#dc2626;--rbg:#fecaca;--rt:#991b1b;
+--blue:#2563eb;--bbg:#dbeafe;--bt:#1e40af;
+--r:10px;
+}
+body{font-family:'Onest',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+.hdr{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:16px 20px 0}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.brand{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.35;margin-bottom:2px}
+.title{font-size:18px;font-weight:700}
+.upd{font-size:10px;opacity:.45;text-align:right}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nav{display:flex;gap:2px;overflow-x:auto}
+.nav button{padding:8px 16px;border:none;border-radius:7px 7px 0 0;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+.nav .on{background:var(--bg);color:var(--text);font-weight:600}
+.nav button:not(.on){background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+.nav button:not(.on):hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
+.tariff-bar{background:#fafaf8;border-bottom:1px solid var(--border);padding:6px 20px;font-size:10px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.tariff-bar b{color:var(--text);font-weight:600}
+.fbar{padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);background:#fefefe}
+.fbar select,.fbar input{padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;background:#fff}
+.fbar input[type=text]{width:160px}
+.fbar input[type=date]{width:130px}
+.fbar .per-btn{padding:4px 10px;border:1px solid var(--border);border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit;background:#fff;transition:.15s}
+.fbar .per-btn.on{background:var(--bbg);border-color:var(--blue);color:var(--bt);font-weight:600}
+.fbar .export-btn{margin-left:auto;padding:5px 12px;border:1px solid var(--gt);border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit;background:var(--gbg);color:var(--gt);font-weight:600}
+.fbar label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.page{padding:16px 20px 40px;display:none}
+.page.show{display:block}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--card);border-radius:var(--r);padding:12px;border:1px solid var(--border)}
+.kpi-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.kpi-v{font-size:18px;font-weight:700}
+.kpi-s{font-size:10px;color:var(--muted);margin-top:1px}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:12px}
+.card-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.alrt{padding:7px 10px;border-radius:7px;font-size:11px;display:flex;align-items:flex-start;gap:6px;margin-bottom:5px}
+.alrt-r{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.alrt-y{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{padding:7px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);background:#fafaf8;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:2px solid var(--border)}
+td{padding:7px 8px;border-bottom:1px solid var(--border)}
+tbody tr:hover{background:#f9f9f6}
+tbody tr.sel{background:#fffbeb}
+.tbl-w{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);background:var(--card)}
+.pill{display:inline-block;padding:2px 8px;border-radius:16px;font-size:9px;font-weight:600;white-space:nowrap}
+.lr{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.lr:not(:last-child){border-bottom:1px solid var(--border)}
+.skc{margin-top:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);overflow:hidden}
+.skc-h{padding:14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.skc-secs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.skc-sec{padding:14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.skc-sec:last-child{border-right:none}
+.skc-st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:8px}
+.skr{display:flex;justify-content:space-between;padding:2px 0;font-size:11px}
+.skr .lb{color:var(--muted)}
+.skr .vl{font-weight:600}
+.ftr{padding:14px;text-align:center;font-size:9px;color:var(--muted);border-top:1px solid var(--border)}
+.green{color:var(--gt)}.red{color:var(--red)}.amber{color:#d97706}.blue{color:var(--blue)}
+.bold{font-weight:700}.w6{font-weight:600}.w5{font-weight:500}
+.loader{padding:60px 20px;text-align:center;color:var(--muted);font-size:13px}
+.loader::before{content:"";display:block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{padding:20px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:var(--r);margin:20px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="hdr">
+<div class="hdr-top">
+<div><div class="brand">Paulain × Lamoda</div><div class="title">Операционный центр</div></div>
+<div class="upd"><span class="live-dot"></span>Живые данные<br><b style="opacity:.8" id="lastUpd">загрузка...</b></div>
+</div>
+<div class="nav" id="nav"></div>
+</div>
+<div class="tariff-bar" id="tariff-bar"></div>
+<div class="fbar" id="fbar"></div>
+<div class="page" id="p0"><div class="loader">Загрузка данных из Supabase...</div></div>
+<div class="page" id="p1"></div>
+<div class="page" id="p2"></div>
+<div class="page" id="p3"></div>
+<div class="ftr">Paulain × Lamoda · MVP v2 · Данные обновляются каждый час</div>
+
+<script>
+const SUPABASE_URL = "https://sbyjctrdrjlddtuwmcmo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieWpjdHJkcmpsZGR0dXdtY21vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDQyMDIsImV4cCI6MjA5MzAyMDIwMn0.ng01Ty9Qsu0oYO8YJRRn5K0glDa4OGHa4JQidkH2Sog";
+
+let DASHBOARD_DATA = [];
+let TARIFFS = [];
+
+async function sb(path) {
+  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  const res = await fetch(url, {
+    headers: {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Accept": "application/json",
+    },
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function loadAll() {
+  try {
+    const [data, tariffs] = await Promise.all([
+      sb("v_sku_dashboard?select=*&limit=2000"),
+      sb("v_current_tariffs?select=*"),
+    ]);
+    DASHBOARD_DATA = data;
+    TARIFFS = tariffs;
+    document.getElementById("lastUpd").textContent =
+      new Date().toLocaleString("ru-RU", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    renderAll();
+  } catch (e) {
+    document.getElementById("p0").innerHTML = `<div class="err"><b>Ошибка загрузки данных:</b><br>${e.message}<br><br>Проверьте что в файле подставлен корректный anon key.</div>`;
+    console.error(e);
+  }
+}
+
+// ===== HELPERS =====
+const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("ru-RU");
+const fR = n => n == null ? "—" : fmt(n) + " ₽";
+const tariffVal = type => {
+  const t = TARIFFS.find(x => x.tariff_type === type);
+  return t ? +t.value : null;
+};
+
+// Чистое название SKU без null
+const cleanName = s => {
+  const parts = [s.model];
+  if (s.color && s.color !== 'null') parts.push(s.color);
+  return parts.filter(Boolean).join(' ');
+};
+
+const turnoverBand = (t) => {
+  if (t == null) return { l:"Нет данных", bg:"#f3f4f6", c:"#6b7280" };
+  if (t === 0) return { l:"Нулевая", bg:"var(--rbg)", c:"var(--rt)" };
+  if (t < 0.5) return { l:"Слабая", bg:"var(--obg)", c:"var(--ot)" };
+  if (t < 1.5) return { l:"Нормальная", bg:"var(--ybg)", c:"var(--yt)" };
+  return { l:"Высокая", bg:"var(--gbg)", c:"var(--gt)" };
+};
+
+let period = "30", catF = "all", searchF = "";
+let dateFrom = "", dateTo = "";
+
+const filtered = () => DASHBOARD_DATA.filter(s =>
+  (catF === "all" || s.category === catF) &&
+  (searchF === "" || cleanName(s).toLowerCase().includes(searchF.toLowerCase()) || (s.lamoda_sku||"").toLowerCase().includes(searchF.toLowerCase()))
+);
+
+const cats = () => [...new Set(DASHBOARD_DATA.map(s => s.category).filter(Boolean))].sort();
+
+const agg = () => {
+  const f = filtered();
+  return {
+    skuCount: f.length,
+    tStock: f.reduce((a,s) => a + (s.stock_lm || 0), 0),
+    tTransit: f.reduce((a,s) => a + (s.in_transit || 0), 0),
+    tInProc: f.reduce((a,s) => a + (s.on_reserve||0) + (s.in_delivery||0) + (s.at_pvz||0), 0),
+    tSold30: f.reduce((a,s) => a + (s.sold_30d || 0), 0),
+    tSold90: f.reduce((a,s) => a + (s.sold_90d || 0), 0),
+    tSold180: f.reduce((a,s) => a + (s.sold_180d || 0), 0),
+    tStorage: f.reduce((a,s) => a + (+s.storage_cost || 0), 0),
+    tPokat: f.reduce((a,s) => a + (+s.pokatushki_cost || 0), 0),
+    deficit: f.filter(s => s.is_deficit).length,
+    storageRisk: f.filter(s => s.is_storage_risk).length,
+    lowBuyout: f.filter(s => s.is_low_buyout).length,
+  };
+};
+
+const soldByPeriod = (s) => {
+  if (period === "30") return s.sold_30d || 0;
+  if (period === "90") return s.sold_90d || 0;
+  if (period === "180") return s.sold_180d || 0;
+  if (period === "custom") return s.sold_180d || 0;
+  return s.sold_30d || 0;
+};
+
+const periodLabel = () => {
+  if (period === "30") return "30 дней";
+  if (period === "90") return "90 дней";
+  if (period === "180") return "180 дней";
+  if (period === "custom" && dateFrom && dateTo) return `${dateFrom} — ${dateTo}`;
+  return "Свой период (выберите даты)";
+};
+
+const pages = ["Сводка", "SKU-матрица", "Unit-экономика", "Карточка SKU"];
+let cur = 0;
+function renderNav() {
+  const n = document.getElementById("nav");
+  n.innerHTML = "";
+  pages.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.textContent = p;
+    b.className = i === cur ? "on" : "";
+    b.onclick = () => { cur = i; renderNav(); showPage(); renderAll(); };
+    n.appendChild(b);
+  });
+}
+function showPage() {
+  [0,1,2,3].forEach(i => {
+    document.getElementById("p"+i).className = "page" + (i === cur ? " show" : "");
+  });
+}
+
+function renderTariff() {
+  const comm = tariffVal("commission");
+  const storage = tariffVal("storage");
+  const free = tariffVal("storage_free_days");
+  const del = tariffVal("delivery");
+  const ret = tariffVal("return");
+  const pack = tariffVal("pack");
+  const nds = tariffVal("nds");
+  document.getElementById("tariff-bar").innerHTML = `
+    <b>Тарифы Lamoda:</b>
+    Комиссия: <b>${comm ?? "—"}%</b> · Хранение: <b>${storage ?? "—"}₽/ед/день</b> (бесплатно ${free ?? "—"} дн.) ·
+    Возврат: <b>${ret ?? "—"}₽</b> · Доставка: <b>${del ?? "—"}₽</b> · Упаковка: <b>${pack ?? "—"}₽</b> · НДС: <b>${nds ?? "—"}%</b>`;
+}
+
+function renderFbar() {
+  const c = cats();
+  const isCustom = period === "custom";
+  document.getElementById("fbar").innerHTML = `
+    <label>Период:</label>
+    ${["30","90","180"].map(p => `<button class="per-btn ${period===p?'on':''}" onclick="period='${p}';renderAll()">${p} дн.</button>`).join("")}
+    <button class="per-btn ${isCustom?'on':''}" onclick="period='custom';renderAll()">Свой период</button>
+    ${isCustom ? `
+      <input type="date" value="${dateFrom||''}" onchange="dateFrom=this.value;renderAll()">
+      <span style="font-size:10px;color:var(--muted)">—</span>
+      <input type="date" value="${dateTo||''}" onchange="dateTo=this.value;renderAll()">
+    ` : ""}
+    <label style="margin-left:8px">Категория:</label>
+    <select onchange="catF=this.value;renderAll()">
+      <option value="all">Все</option>
+      ${c.map(x => `<option value="${x}" ${catF===x?'selected':''}>${x}</option>`).join("")}
+    </select>
+    <label>Поиск:</label>
+    <input type="text" placeholder="Модель или артикул..." value="${searchF}" oninput="searchF=this.value;renderAll()">
+    <button class="export-btn" onclick="exportToExcel()">Скачать Excel</button>`;
+}
+
+function exportToExcel() {
+  const f = filtered();
+  const rows = f.map(s => ({
+    "SKU": s.lamoda_sku,
+    "Модель": s.model,
+    "Цвет": s.color || "",
+    "Размер": s.size || "",
+    "Категория": s.category || "",
+    "Остаток ЛМ": s.stock_lm,
+    "В пути": s.in_transit,
+    "На резерве": s.on_reserve,
+    "В доставке": s.in_delivery,
+    "На ПВЗ": s.at_pvz,
+    "Продано 30д": s.sold_30d,
+    "Продано 90д": s.sold_90d,
+    "Продано 180д": s.sold_180d,
+    "Дн. без продаж": s.days_no_sale,
+    "Закуп ₽": s.cost_purchase,
+    "Себес произв. ₽": s.cost_production,
+    "Цена ЛМ ₽": s.price_lamoda,
+    "Прибыль/шт ₽": s.profit_per_unit,
+    "Хранение ₽": s.storage_cost,
+    "Покатушки ₽": s.pokatushki_cost,
+    "Оборачиваемость": s.turnover_internal,
+    "Дефицит": s.is_deficit ? "Да" : "Нет",
+    "Риск хранения": s.is_storage_risk ? "Да" : "Нет",
+    "Низкий выкуп": s.is_low_buyout ? "Да" : "Нет",
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Paulain Lamoda");
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `paulain_lamoda_${date}.xlsx`);
+}
+
+// ===== PAGE 0: SUMMARY =====
+function renderP0() {
+  const a = agg();
+  const f = filtered();
+
+  const catData = {};
+  f.forEach(s => {
+    const k = s.category || "Прочее";
+    if (!catData[k]) catData[k] = { sold: 0, stock: 0, count: 0 };
+    catData[k].sold += soldByPeriod(s);
+    catData[k].stock += s.stock_lm || 0;
+    catData[k].count += 1;
+  });
+
+  // Top alerts — show only most critical 8
+  const alerts = [];
+  f.forEach(s => {
+    if (s.is_deficit && (s.sold_30d || 0) > 0) {
+      alerts.push({ t:"r", priority: 100 + (s.sold_30d || 0), msg:`<b>${cleanName(s)} ${s.size || ''}</b> — остаток ${s.stock_lm} шт, продано ${s.sold_30d} за 30 дн.` });
+    }
+    if (s.is_storage_risk && +s.storage_cost > 200) {
+      alerts.push({ t:"y", priority: +s.storage_cost, msg:`<b>${cleanName(s)} ${s.size || ''}</b> — ${s.days_no_sale} дн. без продаж, хранение ${fR(+s.storage_cost)}` });
+    }
+  });
+  alerts.sort((a,b) => b.priority - a.priority);
+
+  const top = [...f].sort((a,b) => soldByPeriod(b) - soldByPeriod(a)).slice(0, 5);
+  const periodSold = period === "30" ? a.tSold30 : period === "90" ? a.tSold90 : a.tSold180;
+
+  document.getElementById("p0").innerHTML = `
+    <div class="kgrid">
+      <div class="kpi"><div class="kpi-l">SKU всего</div><div class="kpi-v">${a.skuCount}</div><div class="kpi-s">в выборке</div></div>
+      <div class="kpi"><div class="kpi-l">На складе</div><div class="kpi-v">${a.tStock} шт</div><div class="kpi-s">+${a.tTransit} в пути</div></div>
+      <div class="kpi"><div class="kpi-l">В процессе</div><div class="kpi-v blue">${a.tInProc} шт</div><div class="kpi-s">резерв + доставка + ПВЗ</div></div>
+      <div class="kpi"><div class="kpi-l">Продано (${periodLabel()})</div><div class="kpi-v green">${periodSold} шт</div></div>
+      <div class="kpi"><div class="kpi-l">Риск хранения</div><div class="kpi-v ${a.tStorage>0?'red':''}">${fR(a.tStorage)}</div><div class="kpi-s">${a.storageRisk} SKU</div></div>
+      <div class="kpi"><div class="kpi-l">Дефицит</div><div class="kpi-v ${a.deficit>0?'red':''}">${a.deficit} SKU</div><div class="kpi-s">остаток < 3 шт</div></div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <div class="card-t">Продажи по категориям (${periodLabel()})</div>
+        <div class="tbl-w" style="border:none">
+          <table>
+            <thead><tr><th style="text-align:left">Категория</th><th style="text-align:right">SKU</th><th style="text-align:right">Остаток</th><th style="text-align:right">Продано</th></tr></thead>
+            <tfoot><tr class="bold" style="background:#fafaf8"><td>ИТОГО</td><td style="text-align:right">${a.skuCount}</td><td style="text-align:right">${a.tStock}</td><td style="text-align:right">${periodSold}</td></tr></tfoot>
+            <tbody>
+              ${Object.entries(catData).sort((a,b) => b[1].sold - a[1].sold).map(([k,v]) => `
+                <tr><td class="w5">${k}</td><td style="text-align:right">${v.count}</td><td style="text-align:right">${v.stock}</td><td style="text-align:right" class="w6">${v.sold}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t" style="color:var(--rt)">Алерты (${alerts.length})</div>
+        ${alerts.length === 0 ? '<div style="font-size:12px;color:var(--muted);padding:8px 0">Нет активных алертов</div>' : alerts.slice(0,8).map(x => `<div class="alrt alrt-${x.t}">${x.msg}</div>`).join("")}
+        ${alerts.length > 8 ? `<div style="font-size:10px;color:var(--muted);padding-top:6px">...и ещё ${alerts.length-8} алертов. См. вкладку SKU-матрица для полного списка.</div>` : ''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-t">Топ-5 по продажам (${periodLabel()})</div>
+      ${top.map(s => `
+        <div class="lr">
+          <span class="w5">${cleanName(s)} ${s.size || ''}</span>
+          <span><span class="w6">${soldByPeriod(s)} шт</span> <span style="color:var(--muted);font-size:10px">· остаток ${s.stock_lm}</span></span>
+        </div>`).join("")}
+    </div>`;
+}
+
+// ===== PAGE 1: SKU MATRIX =====
+let sortKey = "sold_30d", sortDir = -1;
+
+function renderP1() {
+  const f = filtered();
+
+  const cols = [
+    { k:"name", l:"SKU", a:"left" },
+    { k:"stock_lm", l:"Остаток", a:"right" },
+    { k:"in_transit", l:"В пути", a:"right" },
+    { k:"on_reserve", l:"Резерв", a:"right" },
+    { k:"in_delivery", l:"Доставка", a:"right" },
+    { k:"at_pvz", l:"ПВЗ", a:"right" },
+    { k:"sold_30d", l:"Прод. 30д", a:"right" },
+    { k:"sold_90d", l:"Прод. 90д", a:"right" },
+    { k:"days_no_sale", l:"Без продаж", a:"right" },
+    { k:"turnover_internal", l:"Оборач.", a:"right" },
+  ];
+
+  const sorted = [...f].sort((a,b) => {
+    const va = a[sortKey], vb = b[sortKey];
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    if (typeof va === "string") return sortDir * va.localeCompare(vb, "ru");
+    return sortDir * (Number(va) - Number(vb));
+  });
+
+  const arrow = k => sortKey === k ? (sortDir > 0 ? " ↑" : " ↓") : "";
+
+  const tot = {
+    stock_lm: f.reduce((a,s) => a + (s.stock_lm||0), 0),
+    in_transit: f.reduce((a,s) => a + (s.in_transit||0), 0),
+    on_reserve: f.reduce((a,s) => a + (s.on_reserve||0), 0),
+    in_delivery: f.reduce((a,s) => a + (s.in_delivery||0), 0),
+    at_pvz: f.reduce((a,s) => a + (s.at_pvz||0), 0),
+    sold_30d: f.reduce((a,s) => a + (s.sold_30d||0), 0),
+    sold_90d: f.reduce((a,s) => a + (s.sold_90d||0), 0),
+  };
+
+  let html = `<div class="tbl-w"><table>
+    <thead><tr>
+      ${cols.map(c => `<th style="text-align:${c.a}" onclick="setSort('${c.k}')">${c.l}${arrow(c.k)}</th>`).join("")}
+    </tr></thead>
+    <tfoot><tr class="bold" style="background:#fafaf8">
+      <td>ИТОГО (${f.length} SKU)</td>
+      <td style="text-align:right">${tot.stock_lm}</td>
+      <td style="text-align:right">${tot.in_transit}</td>
+      <td style="text-align:right">${tot.on_reserve}</td>
+      <td style="text-align:right">${tot.in_delivery}</td>
+      <td style="text-align:right">${tot.at_pvz}</td>
+      <td style="text-align:right">${tot.sold_30d}</td>
+      <td style="text-align:right">${tot.sold_90d}</td>
+      <td colspan="2"></td>
+    </tr></tfoot>
+    <tbody>`;
+
+  sorted.forEach(s => {
+    const tb = turnoverBand(s.turnover_internal);
+    const stockCls = s.is_deficit ? "red bold" : (s.stock_lm < 6 ? "amber" : "");
+    const dnsCls = s.days_no_sale >= 28 ? "red" : s.days_no_sale >= 14 ? "amber" : "";
+    html += `<tr>
+      <td class="w5">
+        <div>${cleanName(s)} <span style="color:var(--muted)">${s.size || ''}</span></div>
+        <div style="font-size:9px;color:var(--muted)">${s.category || ''}</div>
+      </td>
+      <td style="text-align:right" class="${stockCls}">${s.stock_lm ?? "—"}</td>
+      <td style="text-align:right">${s.in_transit || "—"}</td>
+      <td style="text-align:right">${s.on_reserve || "—"}</td>
+      <td style="text-align:right">${s.in_delivery || "—"}</td>
+      <td style="text-align:right">${s.at_pvz || "—"}</td>
+      <td style="text-align:right" class="w6">${s.sold_30d ?? "—"}</td>
+      <td style="text-align:right">${s.sold_90d ?? "—"}</td>
+      <td style="text-align:right" class="${dnsCls}">${s.days_no_sale === 999 ? "∞" : (s.days_no_sale ?? "—")}</td>
+      <td style="text-align:right">
+        ${s.turnover_internal != null ? `<span class="pill" style="background:${tb.bg};color:${tb.c}">${(+s.turnover_internal).toFixed(2)} · ${tb.l}</span>` : '<span style="color:var(--muted)">—</span>'}
+      </td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--muted)">
+      <b>Оборачиваемость</b> = себестоимость проданного ÷ себестоимость остатка<br>
+      Зоны: 0 — нулевая, до 0.5 — слабая, до 1.5 — нормальная, выше — высокая
+    </div>`;
+
+  document.getElementById("p1").innerHTML = html;
+}
+
+window.setSort = function(k) {
+  if (sortKey === k) sortDir = -sortDir;
+  else { sortKey = k; sortDir = -1; }
+  renderP1();
+};
+
+// ===== PAGE 2: ECONOMICS =====
+function renderP2() {
+  const f = filtered();
+  const a = agg();
+
+  const sorted = [...f].sort((a,b) => {
+    const pa = (+a.profit_per_unit || 0) * (a.sold_30d || 0);
+    const pb = (+b.profit_per_unit || 0) * (b.sold_30d || 0);
+    return pb - pa;
+  });
+
+  const totProfit = sorted.reduce((acc,s) => acc + (+s.profit_per_unit || 0) * (s.sold_30d || 0), 0);
+  const totSold = sorted.reduce((acc,s) => acc + (s.sold_30d || 0), 0);
+
+  let html = `<div class="kgrid">
+    <div class="kpi"><div class="kpi-l">Прибыль (30д)</div><div class="kpi-v ${totProfit>0?'green':''}">${fR(totProfit)}</div></div>
+    <div class="kpi"><div class="kpi-l">Продано (30д)</div><div class="kpi-v">${totSold} шт</div></div>
+    <div class="kpi"><div class="kpi-l">Потери: хранение</div><div class="kpi-v ${a.tStorage>0?'red':''}">${fR(a.tStorage)}</div><div class="kpi-s">${a.storageRisk} SKU</div></div>
+    <div class="kpi"><div class="kpi-l">Потери: покатушки</div><div class="kpi-v ${a.tPokat>0?'red':''}">${fR(a.tPokat)}</div></div>
+  </div>
+
+  <div class="tbl-w"><table>
+    <thead><tr>
+      <th style="text-align:left">SKU</th>
+      <th style="text-align:right">Закуп ₽</th>
+      <th style="text-align:right">Себес произв.</th>
+      <th style="text-align:right">Прибыль/шт</th>
+      <th style="text-align:right">Хранение</th>
+      <th style="text-align:right">Покатушки</th>
+      <th style="text-align:right">Продано 30д</th>
+      <th style="text-align:right">Прибыль ∑</th>
+    </tr></thead>
+    <tfoot><tr class="bold" style="background:#fafaf8">
+      <td>ИТОГО</td>
+      <td colspan="3"></td>
+      <td style="text-align:right;color:var(--red)">${fR(a.tStorage)}</td>
+      <td style="text-align:right;color:var(--red)">${fR(a.tPokat)}</td>
+      <td style="text-align:right">${totSold}</td>
+      <td style="text-align:right;color:var(--gt)">${fR(totProfit)}</td>
+    </tr></tfoot>
+    <tbody>`;
+
+  sorted.slice(0, 100).forEach(s => {
+    const profit = +s.profit_per_unit || 0;
+    const total = profit * (s.sold_30d || 0);
+    html += `<tr>
+      <td class="w5">
+        <div>${cleanName(s)} ${s.size || ''}</div>
+        <div style="font-size:9px;color:var(--muted)">${s.category || ''}</div>
+      </td>
+      <td style="text-align:right" class="blue">${fmt(s.cost_purchase)}</td>
+      <td style="text-align:right">${fmt(s.cost_production)}</td>
+      <td style="text-align:right" class="bold ${profit>0?'green':profit<0?'red':''}">${profit !== 0 ? fR(profit) : '—'}</td>
+      <td style="text-align:right" class="${+s.storage_cost>0?'red':''}">${+s.storage_cost > 0 ? fR(+s.storage_cost) : '—'}</td>
+      <td style="text-align:right" class="${+s.pokatushki_cost>0?'red':''}">${+s.pokatushki_cost > 0 ? fR(+s.pokatushki_cost) : '—'}</td>
+      <td style="text-align:right">${s.sold_30d ?? '—'}</td>
+      <td style="text-align:right" class="bold ${total>0?'green':total<0?'red':''}">${total !== 0 ? fR(total) : '—'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--muted)">
+      Прибыль/шт = Цена − Комиссия Lamoda − Логистика − Упаковка − Себестоимость − НДС<br>
+      Покатушки = (Отказы + Возвраты) × Стоимость доставки<br>
+      ${sorted.length > 100 ? `<i>Показаны топ-100 SKU. Всего: ${sorted.length}. Используйте фильтры.</i>` : ''}
+    </div>`;
+
+  document.getElementById("p2").innerHTML = html;
+}
+
+// ===== PAGE 3: SKU CARD =====
+let selC = null;
+function renderP3() {
+  const f = filtered();
+  if (!selC && f.length > 0) selC = f[0].id;
+
+  // Sort options alphabetically
+  const sortedF = [...f].sort((a,b) => cleanName(a).localeCompare(cleanName(b), "ru"));
+  const skuList = sortedF.map(s => `<option value="${s.id}" ${s.id===selC?'selected':''}>${cleanName(s)} ${s.size || ''} (${s.category || ''})</option>`).join("");
+  const s = f.find(x => x.id === selC) || f[0];
+
+  if (!s) { document.getElementById("p3").innerHTML = `<div class="card">Нет данных</div>`; return; }
+
+  const tb = turnoverBand(s.turnover_internal);
+  const profit = +s.profit_per_unit || 0;
+
+  document.getElementById("p3").innerHTML = `
+    <div style="margin-bottom:10px">
+      <select onchange="selC=+this.value;renderP3()" style="font-weight:600;min-width:280px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit">${skuList}</select>
+    </div>
+    <div class="skc">
+      <div class="skc-h">
+        <div>
+          <div style="font-size:16px;font-weight:700">${cleanName(s)} ${s.size || ''}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.category || ''} · ${s.lamoda_sku}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${s.turnover_internal != null ? `<span class="pill" style="background:${tb.bg};color:${tb.c}">Оборач: ${(+s.turnover_internal).toFixed(2)} · ${tb.l}</span>` : ''}
+          ${s.is_deficit ? '<span class="pill" style="background:var(--rbg);color:var(--rt)">Дефицит</span>' : ''}
+          ${s.is_storage_risk ? '<span class="pill" style="background:var(--ybg);color:var(--yt)">Платное хранение</span>' : ''}
+        </div>
+      </div>
+      <div class="skc-secs">
+        <div class="skc-sec">
+          <div class="skc-st">Остатки и движение</div>
+          ${[
+            ["На складе Lamoda", (s.stock_lm ?? "—") + " шт"],
+            ["В пути", s.in_transit > 0 ? s.in_transit + " шт" : "—"],
+            ["На резерве", (s.on_reserve || 0) + " шт"],
+            ["В доставке", (s.in_delivery || 0) + " шт"],
+            ["На ПВЗ", (s.at_pvz || 0) + " шт"],
+            ["Эффективный остаток", (s.effective_stock ?? "—") + " шт"],
+          ].map(r => `<div class="skr"><span class="lb">${r[0]}</span><span class="vl">${r[1]}</span></div>`).join("")}
+        </div>
+        <div class="skc-sec">
+          <div class="skc-st">Продажи</div>
+          ${[
+            ["Продано за 30 дн.", (s.sold_30d ?? "—") + " шт"],
+            ["Продано за 90 дн.", (s.sold_90d ?? "—") + " шт"],
+            ["Продано за 180 дн.", (s.sold_180d ?? "—") + " шт"],
+            ["Дней без продаж", s.days_no_sale === 999 ? "Нет продаж" : (s.days_no_sale ?? "—")],
+            ["Оборачиваемость", s.turnover_internal != null ? (+s.turnover_internal).toFixed(2) : "—"],
+          ].map(r => `<div class="skr"><span class="lb">${r[0]}</span><span class="vl">${r[1]}</span></div>`).join("")}
+        </div>
+        <div class="skc-sec">
+          <div class="skc-st">Экономика</div>
+          ${[
+            ["Цена Lamoda", fR(s.price_lamoda)],
+            ["Цена закупа", `<span class="blue">${fR(s.cost_purchase)}</span>`],
+            ["Себестоимость произв.", fR(s.cost_production)],
+            ["Прибыль/шт", `<span class="bold ${profit>0?'green':profit<0?'red':''}">${profit!==0?fR(profit):'—'}</span>`],
+            ["Хранение", +s.storage_cost > 0 ? `<span class="red">${fR(+s.storage_cost)}</span>` : "—"],
+            ["Покатушки", +s.pokatushki_cost > 0 ? `<span class="red">${fR(+s.pokatushki_cost)}</span>` : "—"],
+            ["Прибыль ∑ (30д)", `<span class="bold ${profit*(s.sold_30d||0)>0?'green':profit*(s.sold_30d||0)<0?'red':''}">${profit*(s.sold_30d||0)!==0?fR(profit*(s.sold_30d||0)):'—'}</span>`],
+          ].map(r => `<div class="skr"><span class="lb">${r[0]}</span><span class="vl">${r[1]}</span></div>`).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderAll() {
+  renderTariff();
+  renderFbar();
+  if (cur === 0) renderP0();
+  if (cur === 1) renderP1();
+  if (cur === 2) renderP2();
+  if (cur === 3) renderP3();
+}
+
+renderNav();
+showPage();
+loadAll();
+
+setInterval(loadAll, 5 * 60 * 1000);
+</script>
+</body>
+</html>
